@@ -1,6 +1,7 @@
+import os
+import os.path
+
 def rel_walk(root=".", start=None):
-    import os
-    import os.path
     for path, _, files in os.walk(root):
         for name in files:
             filename = os.path.join(path, name)
@@ -8,16 +9,12 @@ def rel_walk(root=".", start=None):
             yield relative_filename
 
 def walk(root="."):
-    import os
-    import os.path
     for path, _, files in os.walk(root):
         for name in files:
             filename = os.path.join(path, name)
             yield filename
 
 def count(root="."):
-    import os
-    import os.path
     cnt = 0
     for _, _, files in os.walk(root):
         for _ in files:
@@ -25,8 +22,6 @@ def count(root="."):
     return cnt
 
 def total_size(root="."):
-    import os
-    import os.path
     ttl_size = 0
     for path, _, files in os.walk(root):
         for name in files:
