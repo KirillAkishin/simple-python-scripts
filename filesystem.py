@@ -1,5 +1,7 @@
 import os
 import os.path
+import sys
+from pathlib import Path
 
 def rel_walk(root=".", start=None):
     for path, _, files in os.walk(root):
@@ -41,3 +43,43 @@ def filesize(filename):
         return f"{size:.1f} MiB"
     size /= 1024
     return f"{size:.1f} GiB"
+
+
+def resolve_path(path_str: str) -> Path:
+    expanded_vars = os.path.expandvars(path_str)
+    expanded_user = Path(expanded_vars).expanduser()
+    absolute_path = expanded_user.resolve()
+    return absolute_path
+
+def smart_resolve(path_str: str, *, strict: bool = True) -> Path:
+    def check_invalid_chars(p: str) -> None:
+        if sys.platform.startswith('win'):
+            forbidden = '<>:"/\\|?*'
+            if any(ch in forbidden for ch in p):
+                raise ValueError(f"Path contains invalid characters: {forbidden}")
+            if any(ord(ch) < 32 for ch in p):
+                raise ValueError("Path contains control characters (ASCII < 32)")
+        else:
+            if '\x00' in p:
+                raise ValueError("Path contains invalid NULL character: '\\x00'")
+
+    expanded_vars = os.path.expandvars(path_str)
+    expanded_user = Path(expanded_vars).expanduser()
+    check_invalid_chars(str(expanded_user))
+    abs_path = expanded_user.resolve()
+    if abs_path.exists():
+        if not os.access(abs_path, os.R_OK):
+            msg = f"No permission to read file: `{abs_path}`"
+            if strict:
+                raise PermissionError(msg)
+            else:
+                print(f"Warning! {msg}", file=sys.stderr)
+    else:
+        msg = f"Path does not exist: '{abs_path}'"
+        if strict:
+            raise FileNotFoundError(msg)
+        else:
+            print(f"Warning! '{msg}'", file=sys.stderr)
+    return abs_path
+
+
