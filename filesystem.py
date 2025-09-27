@@ -82,4 +82,15 @@ def smart_resolve(path_str: str, *, strict: bool = True) -> Path:
             print(f"Warning! '{msg}'", file=sys.stderr)
     return abs_path
 
+def touch_file(filename: str):
+    """
+    Linux `touch` command
+    """
+
+    try:
+        with open(filename, 'a'):
+            os.utime(filename, None)
+    except OSError as e:
+        logging.debug(f"Error touching file {filename}: {e}")
+
 
