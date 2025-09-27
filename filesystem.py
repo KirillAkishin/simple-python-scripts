@@ -23,7 +23,12 @@ def count(root="."):
             cnt += 1
     return cnt
 
+# todo: du-command
 def total_size(root="."):
+    """
+    du [ROOT] # Directories only
+    """
+
     ttl_size = 0
     for path, _, files in os.walk(root):
         for name in files:
@@ -31,8 +36,13 @@ def total_size(root="."):
     return ttl_size
 
 def filesize(filename):
-    from os import stat
-    size = stat(filename).st_size
+    """
+    du -h [FILENAME] # Files only
+    """
+
+    size = os.stat(filename).st_size
+    if size == 0:
+        return False
     if (size // 1024) == 0:
         return f"{size} B"
     size /= 1024
@@ -84,7 +94,7 @@ def smart_resolve(path_str: str, *, strict: bool = True) -> Path:
 
 def touch_file(filename: str, atime_only:bool=False):
     """
-    Linux `touch` command
+    touch [-a] [FILENAME]
     """
 
     if not os.path.exists(filename):
